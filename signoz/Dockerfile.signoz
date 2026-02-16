@@ -1,6 +1,22 @@
-FROM signoz/signoz:v0.111.0
+# Stage 1: Build patched Go binary from our fork
+FROM golang:1.24 AS builder
+WORKDIR /src
+COPY signoz-src/ .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -C cmd/enterprise \
+    -tags timetzdata -o /out/signoz \
+    -ldflags "-s -w -X github.com/SigNoz/signoz/pkg/version.variant=enterprise"
 
+# Stage 2: Get frontend + templates from official image
+FROM signoz/signoz:v0.111.0 AS official
+
+# Stage 3: Combine patched binary with official frontend
+FROM alpine:3.20.3
+WORKDIR /root
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+COPY --from=builder /out/signoz /root/signoz
+COPY --from=official /etc/signoz/web/ /etc/signoz/web/
+COPY --from=official /root/templates /root/templates
 COPY signoz/prometheus.yml /root/config/prometheus.yml
 COPY dashboards /root/config/dashboards
-
+RUN chmod 755 /root /root/signoz
 CMD ["./signoz", "server"]

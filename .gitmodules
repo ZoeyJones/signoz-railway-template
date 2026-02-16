@@ -1,0 +1,3 @@
+[submodule "signoz/signoz-src"]
+	path = signoz/signoz-src
+	url = https://github.com/ZoeyJones/signoz
