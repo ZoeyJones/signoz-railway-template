@@ -4,7 +4,7 @@
 > - Remove stale `--feature-gates` flag that crashes the otel-collector
 > - Set JWT secret, fix deprecated env vars, and correct migrator DSN syntax
 >
-> See [WHY.md](WHY.md) for full details and manual post-deploy steps.
+> See [WHY.md](https://github.com/ZoeyJones/signoz-railway-template/blob/main/WHY.md) for full details and manual post-deploy steps.
 
 # Deploy and Host SigNoz on Railway
 
