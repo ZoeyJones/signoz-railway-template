@@ -2,6 +2,7 @@
 > - Pin Docker images to specific versions instead of `:latest`
 > - Add missing `server` subcommand to SigNoz entrypoint
 > - Remove stale `--feature-gates` flag that crashes the otel-collector
+> - Set JWT secret, fix deprecated env vars, and correct migrator DSN syntax
 >
 > See [WHY.md](WHY.md) for full details and manual post-deploy steps.
 
