@@ -1,6 +1,6 @@
 # Why This Fork Exists
 
-The [upstream SigNoz Railway template](https://github.com/SigNoz/signoz-railway-template) does not deploy cleanly. This fork applies the minimum set of Dockerfile changes to make it work out of the box.
+The [upstream SigNoz Railway template](https://github.com/SigNoz/signoz-railway-template) does not deploy cleanly. This fork applies the minimum set of Dockerfile and template configuration changes to make it work out of the box.
 
 ## What the fork fixes
 
@@ -10,45 +10,13 @@ The [upstream SigNoz Railway template](https://github.com/SigNoz/signoz-railway-
 | 2 | Missing `server` subcommand | `signoz` container exits immediately with usage error | Upstream `CMD` omits the required `server` subcommand | `CMD ["./signoz", "server"]` in `Dockerfile.signoz` |
 | 3 | Stale feature gate | otel-collector crashes on startup with "unknown feature gate" | Upstream start command includes `--feature-gates=-pkg.translator.prometheus.NormalizeName` which was removed in recent collector versions | Override `CMD` in `Dockerfile.otel` without the flag |
 | 4 | Schema migrator version | Column-not-found errors in collector after deploying with mismatched versions | Upstream template doesn't pin the schema migrator image; Railway dashboard defaults to `:latest` which may not match the app version | Documented version mapping — migrator must match app version |
+| 5 | Missing JWT secret | Anyone can forge valid session tokens | `SIGNOZ_TOKENIZER_JWT_SECRET` not set — sessions signed with empty string | Template config sets a generated secret |
+| 6 | Deprecated env var names | Warning logs on every startup | Upstream uses `TELEMETRY_ENABLED` and `STORAGE` which are deprecated | Template config uses `SIGNOZ_ANALYTICS_ENABLED` and `SIGNOZ_TELEMETRYSTORE_PROVIDER` |
+| 7 | Broken migrator DSN | Schema migrators crash with DSN parse error | Start command uses `tcp://[clickhouse]:9000` — literal brackets instead of Railway variable syntax | Template config uses `tcp://${{clickhouse.RAILWAY_PRIVATE_DOMAIN}}:9000` and removes bogus `npm run migrate` pre-deploy command |
 
 ## Manual steps still required after deploy
 
-These items require Railway dashboard actions and cannot be fixed in the fork's Dockerfiles.
-
-### 1. Set JWT secret
-
-```bash
-railway service signoz
-railway variables set SIGNOZ_TOKENIZER_JWT_SECRET=$(openssl rand -hex 32)
-```
-
-Without this, sessions are signed with an empty string — anyone can forge valid tokens.
-
-### 2. Rename deprecated env vars
-
-Railway dashboard → **signoz** → **Variables**:
-
-| Old (template default) | New | Value |
-|------------------------|-----|-------|
-| `TELEMETRY_ENABLED` | `SIGNOZ_ANALYTICS_ENABLED` | `true` |
-| `STORAGE` | `SIGNOZ_TELEMETRYSTORE_PROVIDER` | `clickhouse` |
-
-Delete the old variables after adding the new ones.
-
-### 3. Fix schema migrator start commands
-
-The template uses `tcp://[clickhouse]:9000` which is not valid Railway variable syntax — `[clickhouse]` is passed as a literal string, causing a DSN parse error.
-
-Update both migrator start commands on the Railway dashboard:
-
-| Migrator | Start Command |
-|----------|--------------|
-| **sync** | `/bin/sh -c "sleep 120 && exec ./signoz-schema-migrator sync --dsn=tcp://${{clickhouse.RAILWAY_PRIVATE_DOMAIN}}:9000 --up="` |
-| **async** | `./signoz-schema-migrator async --dsn=tcp://${{clickhouse.RAILWAY_PRIVATE_DOMAIN}}:9000 --up=` |
-
-Also remove the `npm run migrate` pre-deploy command on both migrators — it's a leftover from Railway template boilerplate and does nothing in a Go binary image.
-
-### 4. Complete initial setup
+### 1. Complete initial setup
 
 Open the SigNoz UI and create the first user/organization. Until this is done, the otel-collector logs repeated errors:
 
