@@ -10,6 +10,8 @@
 
 # Deploy and Host SigNoz on Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/sigonly?referralCode=OQJgzK&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
 **[SigNoz](https://signoz.io)** is an open-source observability platform that enables you to collect, store, and analyze distributed application **traces, metrics, and logs** using the OpenTelemetry standard.
 
 ## About Hosting SigNoz
