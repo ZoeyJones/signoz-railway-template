@@ -6,7 +6,7 @@
 >
 > See [WHY.md](https://github.com/ZoeyJones/signoz-railway-template/blob/main/WHY.md) for full details and manual post-deploy steps.
 >
-> **Working demo** — [SigNozDemo](https://github.com/ZoeyJones/SigNozDemo) is a bare-minimum Spring Boot 4 + Kotlin app that validates this template end-to-end. Deploy it alongside SigNoz on Railway and you'll see traces, metrics, and logs flowing within minutes — proof that the template works as advertised.
+> **New to SigNoz on Railway?** Start with the [SigNozDemo guide](https://github.com/ZoeyJones/SigNozDemo) — it walks you through deploying [this template](https://railway.com/deploy/sigonly), verifying traces/metrics/logs end-to-end, and connecting your own app. The demo deploys a Spring Boot 4 + Kotlin service that proves the stack works in under 5 minutes.
 
 # Deploy and Host SigNoz on Railway
 
